@@ -1,0 +1,17 @@
+{
+  "name": "lingbao-m8-linux",
+  "version": "1.0.0",
+  "description": "Settings app for the Lingbao M8 (YXT LB-M8) gaming mouse on Linux: DPI, polling rate, sleep and sensor options, over USB or 2.4 GHz.",
+  "private": true,
+  "license": "MIT",
+  "author": "Muktadi (https://github.com/Muktaditbf)",
+  "repository": "github:Muktaditbf/lingbao-m8-linux",
+  "scripts": {
+    "test": "node test/protocol.test.js",
+    "test:ui": "node test/two-windows.test.js",
+    "test:hardware": "node test/hardware/e2e.test.js"
+  },
+  "devDependencies": {
+    "playwright": "1.64.0"
+  }
+}
