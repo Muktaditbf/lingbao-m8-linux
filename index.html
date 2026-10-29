@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LB-M8 Settings</title>
+<link rel="icon" href="icon.svg">
+<style>
+  @font-face { font-family: Barlow; font-weight: 400; src: url(fonts/Barlow-400.woff2) format('woff2'); }
+  @font-face { font-family: Barlow; font-weight: 500; src: url(fonts/Barlow-500.woff2) format('woff2'); }
+  @font-face { font-family: Barlow; font-weight: 600; src: url(fonts/Barlow-600.woff2) format('woff2'); }
+  @font-face { font-family: 'Chakra Petch'; font-weight: 500; src: url(fonts/ChakraPetch-500.woff2) format('woff2'); }
+  @font-face { font-family: 'Chakra Petch'; font-weight: 600; src: url(fonts/ChakraPetch-600.woff2) format('woff2'); }
+  @font-face { font-family: 'Chakra Petch'; font-weight: 700; src: url(fonts/ChakraPetch-700.woff2) format('woff2'); }
+
+  :root {
+    color-scheme: dark;
+    --bg: #0E1115; --panel: #161A20; --panel-2: #1C2129; --line: #2A313A; --unlit: #1A1F26;
+    --ink: #EEF1F4; --mute: #8E98A3; --steel: #6F7A87;
+    --signal: #FF5A1F; --signal-text: #FF6A33; --glow: rgba(255, 90, 31, .45); --on-signal: #0E1115;
+    --ok: #3DDC97; --bad: #FF6B6B;
+    --hud: 'Chakra Petch', 'Barlow', system-ui, sans-serif;
+    --cut: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  }
+
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body {
+    margin: 0; color: var(--ink); font: 400 16px/1.5 Barlow, system-ui, sans-serif;
+    background:
+      radial-gradient(900px 420px at 50% -120px, rgba(255, 90, 31, .13), transparent 70%),
+      linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px) 0 0 / 100% 32px,
+      linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px) 0 0 / 32px 100%,
+      var(--bg);
+    min-height: 100vh;
+  }
+  main { max-width: 780px; margin: 0 auto; padding: 32px 16px 48px; }
+  h1, h2, h3, p { margin: 0; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .muted { color: var(--mute); }
+  [hidden] { display: none !important; }
+
+  /* controls */
+  button { font: 600 15px/1 var(--hud); letter-spacing: .02em; color: var(--ink); background: var(--panel-2); border: 1px solid var(--line); padding: 11px 18px; cursor: pointer; clip-path: var(--cut); transition: background .15s, border-color .15s; }
+  button:hover:not(:disabled) { border-color: var(--steel); background: #222832; }
+  button.primary { background: var(--signal); border-color: var(--signal); color: var(--on-signal); font-weight: 700; }
+  button.primary:hover:not(:disabled) { background: #FF6D38; border-color: #FF6D38; }
+  button.text { background: none; border: 0; padding: 10px 4px; clip-path: none; color: var(--mute); font-weight: 500; text-decoration: underline; text-underline-offset: 4px; }
+  button.text:hover:not(:disabled) { background: none; color: var(--ink); }
+  button:disabled { opacity: .4; cursor: default; }
+  :focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+  button:not(.text):focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--ink); }
+  input[type=number] { width: 88px; font: 600 17px var(--hud); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; text-align: right; }
+  input[type=number]:hover { border-color: var(--steel); }
+  input[type=range] { accent-color: var(--signal); width: 100%; }
+
+  /* header */
+  .top { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 26px; }
+  .top h1 { display: flex; align-items: center; gap: 12px; font: 700 30px/1 var(--hud); letter-spacing: .02em; }
+  .mark { width: 14px; height: 26px; background: var(--signal); clip-path: polygon(45% 0, 100% 0, 55% 100%, 0 100%); box-shadow: 0 0 16px var(--glow); }
+  .top .sub { margin-top: 8px; }
+  .link { display: flex; align-items: center; gap: 14px; color: var(--mute); font-size: 15px; }
+  .link button.text { padding: 4px 0; font-size: 15px; }
+  .batt { display: inline-flex; align-items: center; gap: 7px; color: var(--ink); font: 600 15px var(--hud); }
+  .batt i { position: relative; width: 26px; height: 13px; border: 1.5px solid var(--steel); border-radius: 2px; padding: 1.5px; }
+  .batt i::after { content: ''; position: absolute; right: -4px; top: 3px; width: 2px; height: 4px; background: var(--steel); }
+  .batt b { display: block; height: 100%; width: var(--lvl, 0%); background: var(--ok); }
+
+  /* welcome */
+  .welcome { padding: 56px 0 24px; max-width: 46ch; }
+  .welcome h2 { font: 700 32px/1.1 var(--hud); margin-bottom: 12px; }
+  .welcome p { color: var(--mute); margin-bottom: 24px; }
+  .msg { min-height: 1.5em; margin-top: 14px; }
+  .msg.bad { color: var(--bad); }
+
+  /* the instrument: readout + LED ladder */
+  .plate { position: relative; background: linear-gradient(180deg, #181D24, var(--panel)); clip-path: polygon(22px 0, 100% 0, 100% calc(100% - 22px), calc(100% - 22px) 100%, 0 100%, 0 22px); padding: 26px 26px 22px; }
+  .plate::before { content: ''; position: absolute; top: 0; left: 22px; width: 64px; height: 2px; background: var(--signal); box-shadow: 0 0 10px var(--glow); }
+  .plate::after { content: ''; position: absolute; bottom: 0; right: 22px; width: 64px; height: 2px; background: var(--line); }
+  .readout { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .big { font: 700 clamp(78px, 17vw, 136px)/.85 var(--hud); font-variant-numeric: tabular-nums; letter-spacing: -.02em; text-shadow: 0 0 34px rgba(255, 90, 31, .22); }
+  .unit { font: 700 24px/1 var(--hud); color: var(--signal-text); letter-spacing: .04em; }
+  .now { margin-top: 12px; color: var(--mute); }
+  .now strong { color: var(--ink); font-weight: 600; }
+  .pending { color: var(--signal-text); font-weight: 600; }
+
+  .ladder { display: grid; grid-template-columns: 40px 1fr; gap: 10px; margin-top: 30px; }
+  .scale { position: relative; height: 224px; font: 600 12px/1 var(--hud); color: var(--mute); }
+  .scale span { position: absolute; right: 0; transform: translateY(50%); }
+  .bars { position: relative; height: 224px; margin-bottom: 36px; display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
+  .bar { position: relative; height: 100%; padding: 0; border: 0; background: none; clip-path: none; transition: none; }
+  .bar:hover:not(:disabled) { background: none; }
+  .bar:focus-visible { outline: 2px solid var(--signal); outline-offset: 4px; box-shadow: none; }
+  /* unlit LED column behind every level, lit segments on top */
+  .bar::before, .fill { position: absolute; left: 14%; right: 14%; bottom: 0;
+    -webkit-mask: repeating-linear-gradient(to top, #000 0 5px, transparent 5px 8px); mask: repeating-linear-gradient(to top, #000 0 5px, transparent 5px 8px); }
+  .bar::before { content: ''; top: 0; background: var(--unlit); }
+  .fill { height: max(var(--h), 5px); background: linear-gradient(to top, #5B6573, var(--steel) 60%, #8592A0); transition: height .25s ease; }
+  .bar.use .fill { background: linear-gradient(to top, #E0400C, var(--signal) 50%, #FF8A3D); }
+  .bar.use::after { content: ''; position: absolute; left: 6%; right: 6%; bottom: 0; height: max(var(--h), 5px); background: radial-gradient(closest-side, var(--glow), transparent); filter: blur(10px); z-index: -1; transition: height .25s ease; }
+  .bar.off .fill { background: #2E353F; }
+  .bar.off .num { opacity: .6; }
+  .val { position: absolute; left: -6px; right: -6px; bottom: calc(max(var(--h), 5px) + 7px); text-align: center; font: 600 15px/1 var(--hud); color: var(--mute); transition: bottom .25s ease; }
+  .bar.use .val { color: var(--signal-text); }
+  .bar.off .val { text-decoration: line-through; }
+  .num { position: absolute; left: 50%; top: calc(100% + 9px); transform: translateX(-50%); min-width: 28px; padding: 5px 6px; font: 700 14px/1 var(--hud); color: var(--mute); clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px); }
+  .bar:hover .num { color: var(--ink); }
+  .bar[aria-pressed=true] .num { background: var(--ink); color: var(--bg); }
+  .grow .fill { animation: boot .7s steps(14, end) both; animation-delay: calc(var(--i) * 60ms); }
+  @keyframes boot { from { height: 0; } }
+
+  .lvl { display: grid; grid-template-columns: 1fr auto; gap: 14px 20px; align-items: center; padding-top: 20px; border-top: 1px solid var(--line); }
+  .lvl h3 { font: 700 21px/1 var(--hud); }
+  .dpi-in { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center; }
+  .dpi-in .muted { font: 600 15px var(--hud); }
+  .lvl-foot { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .hint { font-size: 14px; color: var(--mute); }
+  .cyc { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; }
+  .plate-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+
+  /* performance */
+  .perf { margin-top: 40px; }
+  .perf h2 { font: 700 24px/1 var(--hud); margin-bottom: 6px; }
+  .set { display: grid; grid-template-columns: 1fr auto; gap: 4px 24px; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .set > :first-child { font-weight: 600; }
+  .set .hint { grid-column: 1; max-width: 52ch; }
+  .set > :nth-child(2) { grid-row: 1 / span 2; grid-column: 2; }
+
+  .seg { display: inline-flex; gap: 2px; padding: 3px; background: var(--bg); border: 1px solid var(--line); }
+  .seg label { position: relative; }
+  .seg input { position: absolute; z-index: 1; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .seg span { display: block; padding: 8px 12px; font: 700 15px/1 var(--hud); color: var(--mute); clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); }
+  .seg label:hover span { color: var(--ink); }
+  .seg input:checked + span { background: var(--signal); color: var(--on-signal); }
+  .seg input:focus-visible + span { box-shadow: inset 0 0 0 2px var(--ink); }
+
+  .stepper { display: inline-flex; align-items: center; gap: 6px; }
+  .stepper button { width: 36px; height: 36px; padding: 0; font-size: 18px; clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); }
+  .stepper input { width: 60px; text-align: center; }
+  .stepper small { color: var(--mute); font: 600 14px var(--hud); width: 28px; }
+
+  input[role=switch] { appearance: none; margin: 0; width: 46px; height: 24px; border-radius: 3px; background: var(--unlit); border: 1.5px solid var(--steel); position: relative; cursor: pointer; transition: background .15s, border-color .15s; }
+  input[role=switch]::before { content: ''; position: absolute; top: 3px; left: 3px; width: 15px; height: 15px; border-radius: 2px; background: var(--mute); transition: transform .15s, background .15s; }
+  input[role=switch]:checked { background: var(--signal); border-color: var(--signal); box-shadow: 0 0 12px rgba(255, 90, 31, .35); }
+  input[role=switch]:checked::before { transform: translateX(22px); background: var(--on-signal); }
+  input[role=switch]:disabled { opacity: .45; cursor: default; box-shadow: none; }
+
+  /* save bar */
+  .savebar { position: sticky; bottom: 0; background: rgba(14, 17, 21, .92); backdrop-filter: blur(8px); border-top: 1px solid var(--line); transition: border-color .2s, box-shadow .2s; }
+  .savebar.dirty { border-top-color: var(--signal); box-shadow: 0 -1px 18px rgba(255, 90, 31, .28); }
+  .savebar .in { max-width: 780px; margin: 0 auto; padding: 12px 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  #status { flex: 1 1 220px; color: var(--mute); }
+  #status.dirty { color: var(--ink); font-weight: 600; }
+  #status.ok { color: var(--ok); }
+  #status.bad { color: var(--bad); }
+
+  @media (max-width: 520px) {
+    .plate { padding: 20px 14px 16px; }
+    .ladder { grid-template-columns: 32px 1fr; gap: 6px; }
+    .bars { gap: 4px; }
+    .val { font-size: 12px; }
+    .dpi-in { grid-template-columns: auto 1fr; }
+    .dpi-in input[type=range] { grid-column: 1 / -1; }
+    .set { grid-template-columns: 1fr auto; }
+    .set .hint { grid-column: 1 / -1; }
+    .set > :nth-child(2) { grid-row: 1; }
+    .set > .seg { grid-column: 1 / -1; grid-row: 2; justify-self: start; margin: 6px 0 2px; }
+    .set:has(> .seg) .hint { grid-row: 3; }
+    #status { flex-basis: 100%; }
+    #discard { margin-left: auto; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; }
+    .grow .fill { animation: none; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header class="top">
+    <div>
+      <h1><span class="mark" aria-hidden="true"></span>LB-M8</h1>
+      <p class="sub muted">Settings for your Lingbao M8 mouse</p>
+    </div>
+    <div id="link" class="link" hidden>
+      <span class="batt"><i aria-hidden="true"><b id="battFill"></b></i><span id="battText"></span></span>
+      <span id="via"></span>
+      <button id="reload" class="text">Reload</button>
+    </div>
+  </header>
+
+  <section id="welcome" class="welcome">
+    <h2>Connect your mouse</h2>
+    <p>Plug in the USB cable or the 2.4 GHz receiver, then pick <span style="white-space:nowrap">LB-M8</span> in the list your browser shows.</p>
+    <button id="connect" class="primary">Connect mouse</button>
+    <p id="connectMsg" class="msg" role="status"></p>
+  </section>
+
+  <div id="editor" hidden>
+    <section class="plate" aria-labelledby="dpiTitle">
+      <h2 id="dpiTitle" class="sr-only">DPI levels</h2>
+      <div class="readout">
+        <span id="nowDpi" class="big"></span><span class="unit">DPI</span>
+      </div>
+      <p class="now"><span id="nowLevel"></span> <span id="pending" class="pending"></span></p>
+
+      <div class="ladder">
+        <div class="scale" aria-hidden="true">
+          <span style="bottom:100%">12k</span><span style="bottom:75%">9k</span><span style="bottom:50%">6k</span><span style="bottom:25%">3k</span><span style="bottom:0">0</span>
+        </div>
+        <div id="bars" class="bars" role="group" aria-label="DPI levels. Choose one to edit it."></div>
+      </div>
+
+      <div class="lvl">
+        <h3 id="lvlTitle"></h3>
+        <button id="useNow">Use this level now</button>
+        <div class="dpi-in">
+          <input type="range" id="lvlRange" min="100" max="12000" step="100" aria-label="DPI for this level">
+          <input type="number" id="lvlDpi" min="100" max="12000" step="100" aria-label="DPI value">
+          <span class="muted">DPI</span>
+        </div>
+        <div class="lvl-foot">
+          <label class="cyc"><input type="checkbox" role="switch" id="inCycle"> <span>In the DPI button cycle</span></label>
+          <span id="cycleHint" class="hint"></span>
+        </div>
+      </div>
+
+      <div class="plate-foot">
+        <p class="hint">Press the DPI button on the mouse and this page follows along.</p>
+        <button id="factory" class="text">Restore factory levels</button>
+      </div>
+    </section>
+
+    <section class="perf" aria-labelledby="perfTitle">
+      <h2 id="perfTitle">Performance</h2>
+      <div class="set">
+        <span id="rateLabel">Polling rate</span>
+        <div id="rate" class="seg" role="radiogroup" aria-labelledby="rateLabel">
+          <label><input type="radio" name="rate" value="125"><span>125</span></label>
+          <label><input type="radio" name="rate" value="250"><span>250</span></label>
+          <label><input type="radio" name="rate" value="500"><span>500</span></label>
+          <label><input type="radio" name="rate" value="1000"><span>1000 Hz</span></label>
+        </div>
+        <span class="hint">How often the mouse reports its position. 1000 Hz is the smoothest.</span>
+      </div>
+      <div class="set">
+        <label for="sleepMin">Sleep after</label>
+        <span class="stepper"><button data-for="sleepMin" data-d="-1" aria-label="Shorter sleep time">−</button><input type="number" id="sleepMin" min="1" max="30" step="1"><button data-for="sleepMin" data-d="1" aria-label="Longer sleep time">+</button><small>min</small></span>
+        <span class="hint">Idle time before the mouse sleeps to save battery, 1–30 minutes.</span>
+      </div>
+      <div class="set">
+        <label for="debounce">Button debounce</label>
+        <span class="stepper"><button data-for="debounce" data-d="-1" aria-label="Lower debounce">−</button><input type="number" id="debounce" min="1" max="20" step="1"><button data-for="debounce" data-d="1" aria-label="Higher debounce">+</button><small>ms</small></span>
+        <span class="hint">Lower is faster. Raise it if a button double-clicks, 1–20 ms.</span>
+      </div>
+      <div class="set">
+        <label for="angleSnap">Angle snapping</label>
+        <input type="checkbox" role="switch" id="angleSnap">
+        <span class="hint">Straightens slightly crooked lines. Most players keep it off.</span>
+      </div>
+      <div class="set">
+        <label for="ripple">Ripple control</label>
+        <input type="checkbox" role="switch" id="ripple">
+        <span class="hint">Smooths jitter at very high DPI, above about 9000.</span>
+      </div>
+      <div class="set">
+        <label for="wake">Move to wake up</label>
+        <input type="checkbox" role="switch" id="wake">
+        <span class="hint">Moving the mouse wakes it from sleep.</span>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer id="savebar" class="savebar" hidden>
+  <div class="in">
+    <p id="status" role="status"></p>
+    <button id="discard">Discard</button>
+    <button id="apply" class="primary">Save to mouse</button>
+  </div>
+</footer>
+
+<script src="lbm8.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const clone = o => structuredClone(o);
+let dev, seq = 0, chain = Promise.resolve(), busy = false;
+let saved, draft, sel = 0, bars = [];
+
+function say(msg, kind = '') { $('status').textContent = msg; $('status').className = kind; }
+
+// one report exchange at a time, so a background refresh never interleaves with a save
+function xfer(cmd, arg, len, data = []) {
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const recv = async () => {
+    const v = await dev.receiveFeatureReport(6);
+    const b = new Uint8Array(v.buffer, v.byteOffset, v.byteLength);
+    return b.length === 41 ? b.subarray(1) : b; // some Chromium builds include the report ID
+  };
+  const run = async () => {
+    const s = seq = (seq + 1) & 0xff;
+    if (!(cmd & 0x80)) { // writes get no reply, like the official app: send, then give the mouse a moment
+      await dev.sendFeatureReport(6, LBM8.packet(cmd, s, arg, len, data));
+      await wait(60);
+      return { b: null, s };
+    }
+    // over 2.4 GHz an idle mouse answers late, so poll for the matching reply and resend if needed
+    for (let attempt = 0; attempt < 3; attempt++) {
+      await dev.sendFeatureReport(6, LBM8.packet(cmd, s, arg, len, data));
+      for (let t = 0; t < 8; t++) {
+        await wait(t ? 30 : 50);
+        const b = await recv();
+        if (b[2] === cmd && b[3] === s) return { b, s };
+      }
+    }
+    return { b: await recv(), s };
+  };
+  const p = chain.then(run);
+  chain = p.catch(() => {});
+  return p;
+}
+
+async function read(cmd, arg, len) {
+  const { b, s } = await xfer(cmd | 0x80, arg, len);
+  if (b[2] !== (cmd | 0x80) || b[3] !== s) throw new Error('The mouse sent an unexpected reply. Reload to try again.');
+  return [...b.subarray(8, 8 + len)];
+}
+
+const readDpi = async () => LBM8.parseDpi(await read(LBM8.CMD_DPI, 0, LBM8.DPI_LEN));
+const readStatus = async () => LBM8.parseStatus(await read(LBM8.STATUS.cmd, LBM8.STATUS.arg, LBM8.STATUS.len));
+async function readRaw() {
+  const out = {};
+  for (const [k, s] of Object.entries(LBM8.SETTINGS)) out[k] = await read(s.cmd, s.arg, s.len);
+  return out;
+}
+
+function showLink(st) {
+  $('battFill').style.setProperty('--lvl', st.battery + '%');
+  $('battText').textContent = `${st.battery}%${st.charging ? ', charging' : ''}`;
+  $('via').textContent = LBM8.PRODUCTS[dev.productId] ?? '';
+  $('link').hidden = false;
+}
+
+function changes() {
+  if (!saved) return 0;
+  const a = saved.dpi, b = draft.dpi;
+  let n = b.levels.filter((d, i) => d !== a.levels[i]).length;
+  for (let i = 0; i < 8; i++) n += ((a.mask ^ b.mask) >> i) & 1;
+  n += a.active !== b.active;
+  n += Object.keys(draft.set).filter(k => draft.set[k] !== saved.set[k]).length;
+  return n;
+}
+
+function updateBar() {
+  const n = changes();
+  $('apply').disabled = $('discard').disabled = !n;
+  $('savebar').classList.toggle('dirty', !!n);
+  say(n ? `${n} unsaved change${n > 1 ? 's' : ''}` : 'Everything matches the mouse', n ? 'dirty' : '');
+}
+
+function buildBars() {
+  $('bars').innerHTML = '';
+  bars = Array.from({ length: 8 }, (_, i) => {
+    const b = document.createElement('button');
+    b.className = 'bar';
+    b.style.setProperty('--i', i);
+    b.innerHTML = '<span class="fill"></span><span class="val"></span><span class="num"></span>';
+    b.querySelector('.num').textContent = i + 1;
+    b.onclick = () => { sel = i; renderDpi(); };
+    $('bars').append(b);
+    return b;
+  });
+  $('bars').onkeydown = e => {
+    const d = { ArrowLeft: -1, ArrowRight: 1 }[e.key];
+    if (!d) return;
+    e.preventDefault();
+    const from = bars.indexOf(e.target);
+    sel = ((from < 0 ? sel : from) + d + 8) % 8; renderDpi(); bars[sel].focus();
+  };
+}
+
+function renderDpi() {
+  const d = draft.dpi, on = i => !!(d.mask & (1 << i));
+  bars.forEach((b, i) => {
+    b.style.setProperty('--h', (d.levels[i] / 120) + '%');
+    b.querySelector('.val').textContent = d.levels[i];
+    b.classList.toggle('use', d.active === i);
+    b.classList.toggle('off', !on(i));
+    b.setAttribute('aria-pressed', sel === i);
+    b.setAttribute('aria-label', `Level ${i + 1}, ${d.levels[i]} DPI${d.active === i ? ', in use' : on(i) ? '' : ', skipped by the DPI button'}`);
+    b.dataset.dpi = d.levels[i]; b.dataset.on = on(i);
+  });
+  const s = saved.dpi;
+  $('nowDpi').textContent = s.levels[s.active];
+  $('nowLevel').innerHTML = `Level <strong>${s.active + 1}</strong> of 8 in use`;
+  const after = d.levels[d.active];
+  $('pending').textContent = (d.active !== s.active || after !== s.levels[s.active]) ? `Changes to ${after} DPI when you save.` : '';
+
+  $('lvlTitle').textContent = `Level ${sel + 1}`;
+  $('lvlRange').value = $('lvlDpi').value = d.levels[sel];
+  $('inCycle').checked = on(sel);
+  $('inCycle').disabled = d.active === sel;
+  $('cycleHint').textContent = d.active === sel ? 'The level in use always stays in the cycle.' : on(sel) ? '' : 'The DPI button skips this level.';
+  $('useNow').disabled = d.active === sel;
+  $('useNow').textContent = d.active === sel ? 'In use' : 'Use this level now';
+  updateBar();
+}
+
+function renderSettings() {
+  const v = draft.set;
+  document.querySelector(`#rate input[value="${v.rate}"]`).checked = true;
+  $('sleepMin').value = v.sleepMin; $('debounce').value = v.debounce;
+  $('angleSnap').checked = v.angleSnap; $('ripple').checked = v.ripple; $('wake').checked = v.wake;
+  updateBar();
+}
+
+function setLevel(dpi) { draft.dpi.levels[sel] = dpi; renderDpi(); }
+$('lvlRange').oninput = e => setLevel(+e.target.value);
+$('lvlDpi').oninput = e => { if (e.target.value !== '') { draft.dpi.levels[sel] = +e.target.value; const r = $('lvlDpi').value; renderDpi(); $('lvlDpi').value = r; } };
+$('inCycle').onchange = e => { draft.dpi.mask ^= 1 << sel; renderDpi(); };
+$('useNow').onclick = () => { draft.dpi.mask |= 1 << sel; draft.dpi.active = sel; renderDpi(); };
+document.querySelectorAll('#rate input').forEach(r => r.onchange = () => { draft.set.rate = +r.value; updateBar(); });
+for (const id of ['sleepMin', 'debounce']) $(id).oninput = e => { draft.set[id] = +e.target.value; updateBar(); };
+for (const id of ['angleSnap', 'ripple', 'wake']) $(id).onchange = e => { draft.set[id] = e.target.checked; updateBar(); };
+document.querySelectorAll('.stepper button[data-for]').forEach(b => b.onclick = () => {
+  const i = $(b.dataset.for), v = Math.min(+i.max, Math.max(+i.min, +i.value + +b.dataset.d));
+  i.value = v; draft.set[b.dataset.for] = v; updateBar();
+});
+
+async function load() {
+  const dpi = await readDpi(), raw = await readRaw(), st = await readStatus();
+  saved = { dpi, raw, set: LBM8.parseSettings(raw) };
+  draft = clone({ dpi: saved.dpi, set: saved.set });
+  showLink(st);
+  renderDpi();
+  renderSettings();
+}
+
+const FILTERS = Object.keys(LBM8.PRODUCTS).map(p => ({ vendorId: 0xb6a4, productId: +p, usagePage: 0xff01 }));
+const isMouse = d => FILTERS.some(f => f.productId === d.productId) && d.vendorId === 0xb6a4 && d.collections.some(c => c.usagePage === 0xff01);
+const connectMsg = t => { $('connectMsg').textContent = t; $('connectMsg').className = 'msg bad'; };
+
+async function start(d) {
+  others.postMessage('mine');
+  dev = d;
+  try {
+    if (!dev.opened) await dev.open();
+    buildBars();
+    await load();
+  } catch (e) { dev = null; throw e; }
+  sel = draft.dpi.active; renderDpi();
+  $('welcome').hidden = true; $('editor').hidden = false; $('savebar').hidden = false;
+  $('bars').classList.add('grow');
+  say('Connected. Showing what’s stored on your mouse.', 'ok');
+}
+
+$('connect').onclick = async () => {
+  if (!navigator.hid) return connectMsg('This browser can’t talk to USB devices. Open this page in Chrome, Edge, Brave or another Chromium browser.');
+  try {
+    const [d] = await navigator.hid.requestDevice({ filters: FILTERS });
+    if (!d) return connectMsg('No mouse was picked. Click Connect mouse and choose LB-M8.');
+    await start(d);
+  } catch (e) { connectMsg(e.message); }
+};
+
+// connect by itself when the browser already remembers the mouse, now or when it's plugged in later
+const autoStart = d => { if (!dev && isMouse(d)) start(d).catch(e => connectMsg(e.message)); };
+navigator.hid?.getDevices?.().then(list => { const d = list.find(isMouse); if (d) autoStart(d); });
+navigator.hid?.addEventListener('connect', e => autoStart(e.device));
+
+$('apply').onclick = async () => {
+  busy = true;
+  try {
+    const data = LBM8.encodeDpi(draft.dpi);
+    const want = LBM8.encodeSettings(draft.set, saved.raw); // validates before anything is sent
+    say('Saving…');
+    if (data.join() !== LBM8.encodeDpi(saved.dpi).join()) {
+      await xfer(LBM8.CMD_DPI, 0, LBM8.DPI_LEN, data);
+      const back = await readDpi();
+      if (LBM8.encodeDpi(back).join() !== data.join()) throw new Error('The mouse didn’t keep the new DPI levels. Reload to see what it has.');
+      saved.dpi = back;
+    }
+    for (const [k, s] of Object.entries(LBM8.SETTINGS)) {
+      if (want[k].join() === saved.raw[k].join()) continue;
+      await xfer(s.cmd, s.arg, s.len, want[k]);
+      saved.raw[k] = await read(s.cmd, s.arg, s.len);
+      if (saved.raw[k].join() !== want[k].join()) throw new Error('The mouse didn’t keep one of the performance settings. Reload to see what it has.');
+    }
+    saved.set = LBM8.parseSettings(saved.raw);
+    draft = clone({ dpi: saved.dpi, set: saved.set });
+    renderDpi(); renderSettings();
+    say('Saved to the mouse.', 'ok');
+  } catch (e) { say(e.message, 'bad'); }
+  busy = false;
+};
+
+$('discard').onclick = () => { draft = clone({ dpi: saved.dpi, set: saved.set }); renderDpi(); renderSettings(); say('Changes discarded.'); };
+
+$('reload').onclick = async () => {
+  busy = true;
+  try { await load(); say('Reloaded from the mouse.', 'ok'); } catch (e) { say(e.message, 'bad'); }
+  busy = false;
+};
+
+$('factory').onclick = () => {
+  draft.dpi = { ...draft.dpi, mask: 0x3f, active: 0, levels: [...LBM8.FACTORY] };
+  sel = 0; renderDpi();
+  say('Factory levels filled in. Save to put them on the mouse.', 'dirty');
+};
+
+// follow the mouse's own DPI button and battery while nothing is being edited
+setInterval(async () => {
+  if (!dev || !saved || busy || document.hidden || changes()) return;
+  try {
+    const d = await readDpi(), st = await readStatus();
+    if (busy || changes()) return;
+    showLink(st);
+    if (LBM8.encodeDpi(d).join() !== LBM8.encodeDpi(saved.dpi).join()) {
+      saved.dpi = d; draft.dpi = clone(d); sel = d.active; renderDpi();
+    }
+  } catch { /* the next tick tries again; a real unplug arrives as a disconnect event */ }
+}, 1500);
+
+function stop(message) {
+  dev = null; saved = null;
+  $('editor').hidden = $('savebar').hidden = $('link').hidden = true;
+  $('welcome').hidden = false;
+  connectMsg(message);
+}
+navigator.hid?.addEventListener('disconnect', e => { if (e.device === dev) stop('The mouse was disconnected. Plug it back in and connect again.'); });
+
+// only one window talks to the mouse at a time, like the official app's mutex
+const others = new BroadcastChannel('lb-m8-settings');
+others.onmessage = e => {
+  if (e.data !== 'mine' || !dev) return;
+  const d = dev; stop('The settings are open in another window. Connect here to use this one instead.');
+  d.close().catch(() => {});
+};
+</script>
+</body>
+</html>
