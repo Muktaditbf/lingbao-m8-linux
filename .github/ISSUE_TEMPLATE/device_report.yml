@@ -1,0 +1,27 @@
+name: Device report
+description: Tell us about another mouse that might use the same protocol
+labels: [device]
+body:
+  - type: input
+    id: model
+    attributes:
+      label: Mouse brand and model
+    validations:
+      required: true
+  - type: input
+    id: lsusb
+    attributes:
+      label: lsusb line
+      placeholder: "ID b6a4:xxxx YXT …"
+    validations:
+      required: true
+  - type: dropdown
+    id: works
+    attributes:
+      label: Does the app see it?
+      options: ["Yes, and settings work", "Yes, but something is wrong", "No"]
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: For example, which settings worked, or the name of the official driver.

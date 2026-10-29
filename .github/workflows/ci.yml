@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright
+        run: npm ci --no-audit --no-fund && npx playwright install --with-deps chromium
+      - name: Protocol tests
+        run: npm test
+      - name: UI test (simulated mouse, two windows)
+        run: npm run test:ui
+      - name: Installer syntax
+        run: bash -n install.sh

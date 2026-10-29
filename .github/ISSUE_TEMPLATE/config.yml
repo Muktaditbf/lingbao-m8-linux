@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Protocol reference
+    url: https://github.com/Muktaditbf/lingbao-m8-linux/blob/main/docs/PROTOCOL.md
+    about: What's known about the mouse's commands so far.

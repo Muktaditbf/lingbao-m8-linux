@@ -1,0 +1,35 @@
+name: Bug report
+description: Something doesn't work as expected
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead. Include any message the app showed.
+    validations:
+      required: true
+  - type: dropdown
+    id: connection
+    attributes:
+      label: Connection
+      options: [USB cable, 2.4 GHz receiver, Bluetooth]
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      placeholder: Chrome 130, Brave 1.80…
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: CachyOS with KDE Plasma 6 (Wayland)
+  - type: input
+    id: lsusb
+    attributes:
+      label: lsusb line for the mouse
+      placeholder: "Bus 005 Device 003: ID b6a4:4001 YXT LB-M8"

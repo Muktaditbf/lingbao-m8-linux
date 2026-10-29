@@ -1,0 +1,11 @@
+name: Feature request
+description: Suggest a new setting or improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What would you like?
+      description: Which setting or improvement, and why it matters to you.
+    validations:
+      required: true
